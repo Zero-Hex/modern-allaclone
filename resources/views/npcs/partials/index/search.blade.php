@@ -27,6 +27,23 @@
                 </div>
             </div>
         </div>
+        <div class="flex flex-row gap-4 w-full sm:w-auto">
+            <div class="flex flex-col w-full sm:w-auto">
+                <input type="text" id="zone" name="zone" value="{{ request('zone') }}"
+                    class="w-full input"
+                    placeholder="Filter by zone short name (e.g. gfaydark)" />
+            </div>
+            <div class="flex flex-col w-full sm:w-auto">
+                <input type="text" id="faction" name="faction" value="{{ request('faction') }}"
+                    class="w-full input"
+                    placeholder="Filter by faction name (e.g. Guards of Qeynos)" />
+            </div>
+        </div>
+        @if (config('everquest.trackable_npcs_only'))
+            <p class="text-xs text-gray-500 italic">
+                Showing trackable NPCs only. Set <code>TRACKABLE_NPCS_ONLY=false</code> in <code>.env</code> to show all NPCs.
+            </p>
+        @endif
         <div class="pt-4">
             <button type="submit" class="btn btn-soft">
                 Search

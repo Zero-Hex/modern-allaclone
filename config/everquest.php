@@ -18,8 +18,6 @@ return [
     'show_npc_drop_chances'             => true, // if TRUE, chances of droping of each item will be shown when browsing npcs
     'show_npcs_attack_speed'            => true, // shows informations about NPCs' attack speed
     'spawngroup_around_range'           => 100, // range of surrounding spawngroups, spawngroups page
-    'trackable_npcs_only'               => true, // If TRUE, will only display NPCs that are set to be trackable in search results
-
     /**
      * Items
      */
@@ -38,6 +36,9 @@ return [
      */
     'max_recently_discovered_items'     => 25, // Max number of recently discovered items to display
     'merchants_dont_drop_stuff'         => true, // if TRUE, you won't see merchants drops, damned PEQ world builders ! :)
+    'show_quest_spawn_drops'            => env('SHOW_QUEST_SPAWN_DROPS', false), // If TRUE, include loot from quest/event NPCs that have no fixed spawn point
+    'hide_drops_for_undiscovered'       => env('HIDE_DROPS_FOR_UNDISCOVERED', false), // If TRUE, hide the drop sources section for items not yet discovered on this server
+    'trackable_npcs_only'               => env('TRACKABLE_NPCS_ONLY', true), // If TRUE, will only display NPCs that are set to be trackable in search results
 
     'ignore_zones' => [
         'load',

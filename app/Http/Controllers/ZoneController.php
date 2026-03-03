@@ -65,9 +65,17 @@ class ZoneController extends Controller
         $zone = $zoneCache['zone'];
         $zversion = $zone->version ? ' - version (' . $zone->version . ')' : '';
 
+        // collect all available versions for this zone's short_name
+        $availableVersions = Zone::where('short_name', $zone->short_name)
+            ->select('id', 'version')
+            ->orderBy('version')
+            ->get();
+
         return view('zones.show', [
             ...$zoneCache,
             'altCurrency' => $altCurrency,
+            'availableVersions' => $availableVersions,
+            'currentVersion' => $version,
             'metaTitle' => config('app.name') . ' - Zone: ' . $zone->long_name . $zversion,
         ]);
     }

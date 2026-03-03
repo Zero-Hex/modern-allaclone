@@ -36,6 +36,9 @@
                         </td>
                         <td class="text-nowrap text-right">
                             {{ seconds_to_human($grp->respawntime) }}
+                            @if (($grp->variance ?? 0) > 0)
+                                <span class="text-accent text-xs">+/- {{ seconds_to_human($grp->variance) }}</span>
+                            @endif
                         </td>
                     </tr>
                 @endforeach

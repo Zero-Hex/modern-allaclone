@@ -83,27 +83,40 @@ class ItemViewModel
         });
 
         $itemId = $this->item->id;
+        $showQuestSpawnDrops = config('everquest.show_quest_spawn_drops', false);
 
-        $results = DB::connection('eqemu')->table('items')
+        $query = DB::connection('eqemu')->table('items')
             ->join('lootdrop_entries', 'items.id', '=', 'lootdrop_entries.item_id')
             ->join('lootdrop', 'lootdrop_entries.lootdrop_id', '=', 'lootdrop.id')
             ->join('loottable_entries', 'lootdrop.id', '=', 'loottable_entries.lootdrop_id')
-            ->join('npc_types', 'loottable_entries.loottable_id', '=', 'npc_types.loottable_id')
-            ->join('spawnentry', 'npc_types.id', '=', 'spawnentry.npcID')
-            ->join('spawn2', 'spawnentry.spawngroupID', '=', 'spawn2.spawngroupID')
+            ->join('npc_types', 'loottable_entries.loottable_id', '=', 'npc_types.loottable_id');
+
+        if ($showQuestSpawnDrops) {
+            $query->leftJoin('spawnentry', 'npc_types.id', '=', 'spawnentry.npcID')
+                  ->leftJoin('spawn2', 'spawnentry.spawngroupID', '=', 'spawn2.spawngroupID');
+        } else {
+            $query->join('spawnentry', 'npc_types.id', '=', 'spawnentry.npcID')
+                  ->join('spawn2', 'spawnentry.spawngroupID', '=', 'spawn2.spawngroupID')
+                  ->where('spawnentry.chance', '>', 0);
+        }
+
+        $results = $query
             ->where('items.id', $itemId)
-            ->where('spawnentry.chance', '>', 0)
             ->when($excludeMerchants, fn($q) => $q->where('npc_types.merchant_id', 0))
-            ->when(!empty($ignoreZones), fn($q) => $q->whereNotIn('spawn2.zone', $ignoreZones))
+            ->when(!$showQuestSpawnDrops && !empty($ignoreZones), fn($q) => $q->whereNotIn('spawn2.zone', $ignoreZones))
+            ->when($showQuestSpawnDrops && !empty($ignoreZones), fn($q) => $q->where(fn($sub) =>
+                $sub->whereNull('spawn2.zone')->orWhereNotIn('spawn2.zone', $ignoreZones)
+            ))
             ->select([
-                'spawn2.zone',
-                'spawn2.version',
+                DB::raw('COALESCE(spawn2.zone, "__no_spawn__") as zone'),
+                DB::raw('COALESCE(spawn2.version, 0) as version'),
                 'npc_types.id as npc_id',
                 'npc_types.name as npc_name',
                 'lootdrop_entries.chance as lootdrop_chance',
                 'loottable_entries.probability',
                 'loottable_entries.multiplier',
                 'loottable_entries.loottable_id',
+                DB::raw('(spawnentry.npcID IS NULL) as no_spawn_point'),
             ])
             ->distinct()
             ->get();
@@ -112,25 +125,33 @@ class ItemViewModel
             return strtolower($row->zone) . '-' . $row->version;
         });
 
-
         $drops = [];
         foreach ($grouped as $zoneKey => $npcs) {
             $lastDash = strrpos($zoneKey, '-');
             $zoneShortName = substr($zoneKey, 0, $lastDash);
             $version = substr($zoneKey, $lastDash + 1);
 
-            $zoneData = $allZones->where('short_name', $zoneShortName)
-                                 ->where('version', (int) $version)
-                                 ->first();
+            $isQuestSpawn = ($zoneShortName === '__no_spawn__');
 
-            if (!$zoneData || ($zoneData->expansion ?? 0) > $currentExpansion) {
-                continue;
+            if ($isQuestSpawn) {
+                $zoneName = 'No Spawn Point (Quest/Event)';
+            } else {
+                $zoneData = $allZones->where('short_name', $zoneShortName)
+                                     ->where('version', (int) $version)
+                                     ->first();
+
+                if (!$zoneData || ($zoneData->expansion ?? 0) > $currentExpansion) {
+                    continue;
+                }
+
+                $zoneName = $zoneData->long_name ?? $zoneShortName;
             }
 
             $drops[] = [
-                'zone' => $zoneShortName,
-                'zone_name' => $zoneData->long_name ?? $zoneShortName,
-                'version' => (int) $version,
+                'zone'          => $isQuestSpawn ? '__no_spawn__' : $zoneShortName,
+                'zone_name'     => $zoneName,
+                'version'       => (int) $version,
+                'quest_spawn'   => $isQuestSpawn,
                 'npcs' => $npcs
                     ->unique('npc_name')
                     ->filter(function ($npc) {
@@ -139,14 +160,17 @@ class ItemViewModel
                     })
                     ->map(function ($npc) {
                         $npcCleanName = NpcType::npcFixName($npc->npc_name);
+                        $computedChance = round(($npc->lootdrop_chance / 100) * ($npc->probability / 100) * 100, 4);
                         return [
-                            'id'            => $npc->npc_id,
-                            'name'          => $npc->npc_name,
-                            'clean_name'    => $npcCleanName,
-                            'chance'        => $npc->lootdrop_chance,
-                            'probability'   => $npc->probability,
-                            'multiplier'    => $npc->multiplier,
-                            'loottable_id'  => $npc->loottable_id,
+                            'id'             => $npc->npc_id,
+                            'name'           => $npc->npc_name,
+                            'clean_name'     => $npcCleanName,
+                            'chance'         => $npc->lootdrop_chance,
+                            'probability'    => $npc->probability,
+                            'multiplier'     => $npc->multiplier,
+                            'computed_chance' => $computedChance,
+                            'loottable_id'   => $npc->loottable_id,
+                            'no_spawn_point' => (bool) $npc->no_spawn_point,
                         ];
                 })->sortBy('clean_name', SORT_NATURAL | SORT_FLAG_CASE)->values(),
             ];

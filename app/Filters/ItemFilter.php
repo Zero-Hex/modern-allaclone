@@ -18,6 +18,7 @@ class ItemFilter
         'class',
         'bagslots',
         'effect',
+        'effect_id',
         'evo',
         /* stats */
         'stat1',
@@ -169,6 +170,22 @@ class ItemFilter
                 $query->orWhereHas($relation, function ($q) use ($value) {
                     $q->where('name', 'like', '%' . $this->escapeLike($value) . '%')->select('id');
                 });
+            }
+        });
+    }
+
+    protected function effect_id($value)
+    {
+        if ($value === null || $value === '' || !is_numeric($value)) {
+            return;
+        }
+
+        $id = (int) $value;
+        $effectFields = ['proceffect', 'worneffect', 'focuseffect', 'clickeffect', 'scrolleffect'];
+
+        $this->builder->where(function ($query) use ($id, $effectFields) {
+            foreach ($effectFields as $field) {
+                $query->orWhere($field, $id);
             }
         });
     }

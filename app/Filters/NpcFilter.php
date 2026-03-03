@@ -14,6 +14,8 @@ class NpcFilter
         'name',
         'min_lvl',
         'max_lvl',
+        'zone',
+        'faction',
     ];
 
     public function __construct(Request $request)
@@ -55,5 +57,31 @@ class NpcFilter
     protected function max_lvl($value)
     {
         $this->builder->where('level', '<=', (int) $value);
+    }
+
+    protected function zone($value)
+    {
+        if ($value === null || $value === '') {
+            return;
+        }
+
+        $value = str_replace(['\\', '%'], ['\\\\', '\\%'], $value);
+
+        $this->builder->whereHas('spawnentries.spawn2', function ($q) use ($value) {
+            $q->where('zone', 'like', "%{$value}%");
+        });
+    }
+
+    protected function faction($value)
+    {
+        if ($value === null || $value === '') {
+            return;
+        }
+
+        $value = str_replace(['\\', '%'], ['\\\\', '\\%'], $value);
+
+        $this->builder->whereHas('npcFaction.primaryFaction', function ($q) use ($value) {
+            $q->where('name', 'like', "%{$value}%");
+        });
     }
 }

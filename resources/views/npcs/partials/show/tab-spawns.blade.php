@@ -4,10 +4,11 @@
         <table class="table table-auto md:table-fixed w-full table-zebra">
             <thead class="text-xs uppercase bg-base-300">
                 <tr>
+                    <th scope="col" class="w-[20%] hidden md:table-cell">Spawn Group</th>
                     <th scope="col" class="w-[20%]">Coords (x,y,z)</th>
-                    <th scope="col" class="w-[50%]">Placeholders</th>
+                    <th scope="col" class="w-[35%]">Placeholders</th>
                     <th scope="col" class="w-[10%]">Chance</th>
-                    <th scope="col" class="w-[20%]">Respawn</th>
+                    <th scope="col" class="w-[15%]">Respawn</th>
                 </tr>
             </thead>
             <tbody>
@@ -17,6 +18,9 @@
                             @continue
                         @endif
                         <tr>
+                            <td scope="row" class="hidden md:table-cell text-xs text-gray-400">
+                                {{ $spawn->spawn2->spawnGroup?->name ?? '—' }}
+                            </td>
                             <td scope="row">
                                 @if ($spawn->spawn2)
                                     {{ floor($spawn->spawn2->x) }},

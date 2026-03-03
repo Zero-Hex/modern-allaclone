@@ -27,6 +27,7 @@ class ItemController extends Controller
                     'id', 'Name', 'icon', 'itemtype', 'ac', 'hp', 'damage', 'delay',
                     'augtype', 'slots', 'bagslots', 'bagwr',
                 ])
+                ->withCount(['lootdropEntries', 'merchants'])
                 ->orderBy('id', 'asc')
                 ->paginate(50)
                 ->withQueryString();

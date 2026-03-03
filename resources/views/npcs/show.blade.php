@@ -26,6 +26,12 @@
                     {{ $zone->long_name }}
                 </a>
             @endif
+            @if ($npc->rare_spawn)
+                <span class="badge badge-warning badge-sm">Rare Spawn</span>
+            @endif
+            @if ($npc->raid_target)
+                <span class="badge badge-error badge-sm">Raid Target</span>
+            @endif
         </div>
         <div class="flex flex-row items-center gap-2 mb-4 flex-wrap">
             Primary Faction:
@@ -194,6 +200,9 @@
             @endif
             @if ($raisesFaction || $lowersFaction)
                 @include('npcs.partials.show.tab-faction')
+            @endif
+            @if ($relatedTasks->isNotEmpty())
+                @include('npcs.partials.show.tab-tasks')
             @endif
         </div>
     @endif
