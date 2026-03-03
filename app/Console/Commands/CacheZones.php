@@ -40,8 +40,7 @@ class CacheZones extends Command
             // forget any previous cache we may have
             Cache::forget($cacheKey);
 
-            // cache forever since this data rarely changes.
-            Cache::rememberForever($cacheKey, function () use ($zone, $version) {
+            Cache::remember($cacheKey, now()->addWeek(), function () use ($zone, $version) {
                 $zone = Zone::where('id', $zone->id)
                     ->with('zonepoints', function ($q) use ($version) {
                         $q->when($version > 0, fn ($q) => $q->where('version', $version))

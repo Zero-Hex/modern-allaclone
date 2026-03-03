@@ -22,7 +22,7 @@ class AlternateCurrency extends Model
 
     public static function allAltCurrency(): Collection
     {
-        return Cache::remember('alt_currency', now()->addMonth(), function () {
+        return Cache::remember('alt_currency', now()->addWeek(), function () {
             return self::with('item:id,Name,icon')->get();
         });
     }

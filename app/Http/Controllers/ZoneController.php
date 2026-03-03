@@ -15,7 +15,7 @@ class ZoneController extends Controller
         $currentExpansion = config('everquest.current_expansion');
         $expansions = config('everquest.expansions');
 
-        $zones = Cache::remember('zones.index', now()->addMonth(), function () use ($currentExpansion) {
+        $zones = Cache::remember('zones.index', now()->addWeek(), function () use ($currentExpansion) {
             return Zone::getExpansionZones($currentExpansion);
         });
 
@@ -30,7 +30,7 @@ class ZoneController extends Controller
     {
         $version = (int) $request->query('v', 0);
 
-        $zoneCache = Cache::rememberForever("zones.show.{$zone->id}_v{$version}", function () use ($zone, $version) {
+        $zoneCache = Cache::remember("zones.show.{$zone->id}_v{$version}", now()->addWeek(), function () use ($zone, $version) {
             $zone = Zone::where('id', $zone->id)
                 ->with('zonepoints', function ($q) use ($version) {
                     $q->when($version > 0, fn ($q) => $q->where('version', $version))

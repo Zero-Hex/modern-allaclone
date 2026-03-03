@@ -38,7 +38,7 @@ class TaskController extends Controller
 
     public function show(Task $task)
     {
-        $activities = Cache::remember("task_with_activities_{$task->id}", now()->addMonth(), function () use ($task) {
+        $activities = Cache::remember("task_with_activities_{$task->id}", now()->addWeek(), function () use ($task) {
             $task = Task::with('taskActivities')
                 ->where('id', $task->id)
                 ->where('enabled', 1)

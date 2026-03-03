@@ -76,7 +76,7 @@ class ItemViewModel
         $excludeMerchants = config('everquest.merchants_dont_drop_stuff') ?? true;
         $currentExpansion = config('everquest.current_expansion');
 
-        $allZones = Cache::rememberForever('all_zones_drops', function () {
+        $allZones = Cache::remember('all_zones_drops', now()->addWeek(), function () {
             return Zone::select('id', 'short_name', 'long_name', 'version', 'expansion')
                 ->orderBy('id')
                 ->get();
