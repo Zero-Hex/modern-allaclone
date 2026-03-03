@@ -106,8 +106,6 @@ class SpellController extends Controller
     {
         $effectsOnly = request()->boolean('effects-only');
 
-        $spell = Spell::where('id', $spell->id)->firstOrFail();
-
         return response()->json([
             'html' => view('spells.partials.popup', [
                 'spell' => $spell,

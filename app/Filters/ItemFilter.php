@@ -51,9 +51,14 @@ class ItemFilter
         return $this->builder;
     }
 
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+    }
+
     protected function name($value)
     {
-        $this->builder->where('Name', 'like', "%{$value}%");
+        $this->builder->where('Name', 'like', '%' . $this->escapeLike($value) . '%');
     }
 
     protected function type($value)
@@ -162,7 +167,7 @@ class ItemFilter
         $this->builder->where(function ($query) use ($value, $effectRelations) {
             foreach ($effectRelations as $relation) {
                 $query->orWhereHas($relation, function ($q) use ($value) {
-                    $q->where('name', 'like', "%{$value}%")->select('id');
+                    $q->where('name', 'like', '%' . $this->escapeLike($value) . '%')->select('id');
                 });
             }
         });
@@ -203,7 +208,6 @@ class ItemFilter
 
         if ($stat && $val !== null) {
 
-            // fuck operators in url
             $op = match ((int) $comp) {
                 1 => '>=',
                 2 => '<=',

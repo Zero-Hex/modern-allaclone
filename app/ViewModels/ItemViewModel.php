@@ -115,7 +115,9 @@ class ItemViewModel
 
         $drops = [];
         foreach ($grouped as $zoneKey => $npcs) {
-            [$zoneShortName, $version] = explode('-', $zoneKey);
+            $lastDash = strrpos($zoneKey, '-');
+            $zoneShortName = substr($zoneKey, 0, $lastDash);
+            $version = substr($zoneKey, $lastDash + 1);
 
             $zoneData = $allZones->where('short_name', $zoneShortName)
                                  ->where('version', (int) $version)

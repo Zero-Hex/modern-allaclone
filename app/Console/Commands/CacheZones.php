@@ -37,34 +37,37 @@ class CacheZones extends Command
             $version = $zone->version;
             $cacheKey = "zones.show.{$zone->id}_v{$version}";
 
-            // forget any previous cache we may have
             Cache::forget($cacheKey);
 
-            Cache::remember($cacheKey, now()->addWeek(), function () use ($zone, $version) {
-                $zone = Zone::where('id', $zone->id)
-                    ->with('zonepoints', function ($q) use ($version) {
-                        $q->when($version > 0, fn ($q) => $q->where('version', $version))
-                          ->groupBy('target_zone_id')
-                          ->with('targetZones:id,zoneidnumber,short_name,long_name');
-                    })
-                    ->when($version > 0, fn ($q) => $q->where('version', $version))
-                    ->firstOrFail();
+            try {
+                Cache::remember($cacheKey, now()->addWeek(), function () use ($zone, $version) {
+                    $zone = Zone::where('id', $zone->id)
+                        ->with('zonepoints', function ($q) use ($version) {
+                            $q->when($version > 0, fn ($q) => $q->where('version', $version))
+                              ->groupBy('target_zone_id')
+                              ->with('targetZones:id,zoneidnumber,short_name,long_name');
+                        })
+                        ->when($version > 0, fn ($q) => $q->where('version', $version))
+                        ->firstOrFail();
 
-                $vm = new ZoneViewModel($zone, $version);
+                    $vm = new ZoneViewModel($zone, $version);
 
-                return [
-                    'zone' => $zone,
-                    'npcs' => $vm->npcs(),
-                    'drops' => $vm->drops(),
-                    'spawnGroups' => $vm->spawnGroups(),
-                    'foraged' => $vm->foraged(),
-                    'fished' => $vm->fished(),
-                    'connectedZones' => $vm->connectedZones(),
-                    'tasks' => $vm->tasks(),
-                ];
-            });
+                    return [
+                        'zone' => $zone,
+                        'npcs' => $vm->npcs(),
+                        'drops' => $vm->drops(),
+                        'spawnGroups' => $vm->spawnGroups(),
+                        'foraged' => $vm->foraged(),
+                        'fished' => $vm->fished(),
+                        'connectedZones' => $vm->connectedZones(),
+                        'tasks' => $vm->tasks(),
+                    ];
+                });
 
-            $this->line("Cached: {$cacheKey} -- {$zone->short_name} / {$zone->id}-{$zone->version}");
+                $this->line("Cached: {$cacheKey} -- {$zone->short_name} / {$zone->id}-{$zone->version}");
+            } catch (\Throwable $e) {
+                $this->error("Failed: {$cacheKey} -- {$e->getMessage()}");
+            }
         }
 
         $this->info('All zones cached successfully.');

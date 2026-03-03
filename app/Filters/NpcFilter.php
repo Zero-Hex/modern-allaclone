@@ -40,19 +40,20 @@ class NpcFilter
             return;
         }
 
+        $value = str_replace(['\\', '%'], ['\\\\', '\\%'], $value);
         $value = str_replace(' ', '_', $value);
         $value = str_replace('`', '-', $value);
-        
+
         $this->builder->where('name', 'like', "%{$value}%");
     }
 
     protected function min_lvl($value)
     {
-        $this->builder->where('level', '>=', $value);
+        $this->builder->where('level', '>=', (int) $value);
     }
 
     protected function max_lvl($value)
     {
-        $this->builder->where('level', '<=', $value);
+        $this->builder->where('level', '<=', (int) $value);
     }
 }

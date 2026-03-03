@@ -30,6 +30,10 @@ class ZoneController extends Controller
     {
         $version = (int) $request->query('v', 0);
 
+        if ($version < 0 || $version > 255) {
+            abort(404);
+        }
+
         $zoneCache = Cache::remember("zones.show.{$zone->id}_v{$version}", now()->addWeek(), function () use ($zone, $version) {
             $zone = Zone::where('id', $zone->id)
                 ->with('zonepoints', function ($q) use ($version) {

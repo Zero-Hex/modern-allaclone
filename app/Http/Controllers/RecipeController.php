@@ -47,7 +47,7 @@ class RecipeController extends Controller
         $components = $recipe->componentEntriesWithFlags();
 
         $failCount = $fail->mapWithKeys(function ($entry) {
-            return [$entry->item->id => $entry->failcount];
+            return [($entry->item?->id ?? $entry->item_id) => $entry->failcount];
         })->toArray();;
 
         return view('recipes.show', [

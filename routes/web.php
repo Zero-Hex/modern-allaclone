@@ -15,7 +15,8 @@ use App\Http\Controllers\FactionController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // global search
-Route::get('/search/suggest', [App\Http\Controllers\SearchController::class, 'suggest']);
+Route::get('/search/suggest', [App\Http\Controllers\SearchController::class, 'suggest'])
+    ->middleware('throttle:30,1');
 
 // items
 Route::get('/items', [ItemController::class, 'index'])->name('items.index');

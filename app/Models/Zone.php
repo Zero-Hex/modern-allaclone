@@ -21,7 +21,7 @@ class Zone extends Model
 
     public function fished(): HasMany
     {
-        return $this->hasMany(Forage::class, 'zoneid', 'zoneidnumber');
+        return $this->hasMany(Fishing::class, 'zoneid', 'zoneidnumber');
     }
 
     public function spawns(): HasMany

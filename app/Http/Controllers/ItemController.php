@@ -63,7 +63,6 @@ class ItemController extends Controller
 
     public function popup(Item $item)
     {
-        $item = Item::where('id', $item->id)->firstOrFail();
         (new ItemViewModel($item))->withEffects();
 
         return response()->json([

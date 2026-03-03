@@ -12,6 +12,11 @@ use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+    }
+
     public function suggest(Request $request)
     {
         $q = $request->query('q');
@@ -20,15 +25,17 @@ class SearchController extends Controller
             return response()->json([]);
         }
 
+        $qSafe = $this->escapeLike($q);
+
         // create a special query for npc type names
-        $qNpcs = str_replace(' ', '_', $q);
+        $qNpcs = str_replace(' ', '_', $qSafe);
         $qNpcs = str_replace('`', '-', $qNpcs);
 
         $results = collect();
 
         $results = $results
             ->merge(
-                NpcType::where('name', 'like', "%{$q}%")->orWhere('name', 'like', "%{$qNpcs}%")
+                NpcType::where('name', 'like', "%{$qSafe}%")->orWhere('name', 'like', "%{$qNpcs}%")
                     ->groupBy('name')->limit(5)->get()->map(function ($npc) {
                     return [
                         'type' => 'npc',
@@ -38,7 +45,7 @@ class SearchController extends Controller
                     ];
                 })
             )->merge(
-                Item::where('name', 'like', "%{$q}%")->limit(10)->get()->map(function ($item) {
+                Item::where('name', 'like', "%{$qSafe}%")->limit(10)->get()->map(function ($item) {
                     return [
                         'type' => 'item',
                         'name' => $item->Name,
@@ -47,7 +54,7 @@ class SearchController extends Controller
                     ];
                 })
             )->merge(
-                TradeskillRecipe::where('name', 'like', "%{$q}%")->limit(5)->get()->map(function ($r) {
+                TradeskillRecipe::where('name', 'like', "%{$qSafe}%")->limit(5)->get()->map(function ($r) {
                     return [
                         'type' => 'recipe',
                         'name' => $r->name,
@@ -56,8 +63,8 @@ class SearchController extends Controller
                     ];
                 })
             )->merge(
-                Zone::where('long_name', 'like', "%{$q}%")
-                    ->orWhere('short_name', 'like', "%{$q}%")
+                Zone::where('long_name', 'like', "%{$qSafe}%")
+                    ->orWhere('short_name', 'like', "%{$qSafe}%")
                     ->groupBy('short_name', 'long_name')->limit(5)->get()->map(function ($z) {
                     return [
                         'type' => 'zone',
@@ -67,7 +74,7 @@ class SearchController extends Controller
                     ];
                 })
             )->merge(
-                FactionList::where('name', 'like', "%{$q}%")->limit(5)->get()->map(function ($f) {
+                FactionList::where('name', 'like', "%{$qSafe}%")->limit(5)->get()->map(function ($f) {
                     return [
                         'type' => 'faction',
                         'name' => $f->name,
@@ -76,7 +83,7 @@ class SearchController extends Controller
                     ];
                 })
             )->merge(
-                Spell::where('name', 'like', "%{$q}%")->groupBy('name')->limit(5)->get()->map(function ($s) {
+                Spell::where('name', 'like', "%{$qSafe}%")->groupBy('name')->limit(5)->get()->map(function ($s) {
                     return [
                         'type' => 'spell',
                         'name' => $s->name,
