@@ -25,7 +25,7 @@ class PetController extends Controller
             $selClassName = config('everquest.classes.' . $id);
         }
 
-        $pets = Cache::remember("pet_{$selClass}", now()->addMonth(), function () use ($selClass) {
+        $pets = Cache::remember("pet_{$selClass}", now()->addWeek(), function () use ($selClass) {
             return Spell::with('pets', 'npcs')
                 ->where($selClass, '>', 0)
                 ->where($selClass, '<=', config('everquest.server_max_level'))

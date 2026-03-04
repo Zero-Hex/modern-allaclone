@@ -42,9 +42,14 @@ class SpellFilter
         return $this->builder;
     }
 
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+    }
+
     protected function name($value)
     {
-        $this->builder->where('name', 'like', "%{$value}%");
+        $this->builder->where('name', 'like', '%' . $this->escapeLike($value) . '%');
     }
 
     protected function level($value)
@@ -58,7 +63,8 @@ class SpellFilter
             $level = $max;
         }
 
-        if ($class && $level > 0) {
+        $class = (int) $class;
+        if ($class >= 1 && $class <= 16 && $level > 0) {
             $class_col = "classes{$class}";
 
             if ($opt === 1) {
@@ -93,7 +99,8 @@ class SpellFilter
 
     protected function class($value)
     {
-        if ($value !== null && is_numeric($value) && $value > 0) {
+        $value = (int) $value;
+        if ($value >= 1 && $value <= 16) {
             $class_col = "classes{$value}";
             $this->builder->where($class_col, '>', 0);
 

@@ -37,7 +37,23 @@
         </div>
         @endif
 
-        @include('items.partials.show.drops')
+        @php
+            $hideDrops = config('everquest.hide_drops_for_undiscovered', false)
+                && !\Illuminate\Support\Facades\DB::connection('eqemu')->table('discovered_items')
+                    ->where('item_id', $item->id)
+                    ->where('account_status', '<=', config('everquest.discovered_items_max_status', 20))
+                    ->exists();
+        @endphp
+        @if ($hideDrops)
+            <div class="w-full flex flex-col mb-7">
+                <div class="divider">This item is found on creatures</div>
+                <div class="text-sm text-gray-400 px-2 py-4 italic text-center">
+                    Drop sources hidden — this item has not yet been discovered on this server.
+                </div>
+            </div>
+        @else
+            @include('items.partials.show.drops')
+        @endif
 
         @if ($recipes->isNotEmpty())
             @include('items.partials.show.recipes', ['recipes' => $recipes])

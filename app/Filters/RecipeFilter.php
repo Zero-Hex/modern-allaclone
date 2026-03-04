@@ -37,24 +37,29 @@ class RecipeFilter
         return $this->builder;
     }
 
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+    }
+
     protected function name($value)
     {
-        $this->builder->where('name', 'like', "%{$value}%");
+        $this->builder->where('name', 'like', '%' . $this->escapeLike($value) . '%');
     }
 
     protected function min($value)
     {
-        $this->builder->where('trivial', '>=', $value);
+        $this->builder->where('trivial', '>=', (int) $value);
     }
 
     protected function max($value)
     {
-        $this->builder->where('trivial', '<=', $value);
+        $this->builder->where('trivial', '<=', (int) $value);
     }
 
     protected function ts($value)
     {
-        $this->builder->where('tradeskill', $value);
+        $this->builder->where('tradeskill', (int) $value);
     }
 
     protected function applyExpansionFilter()

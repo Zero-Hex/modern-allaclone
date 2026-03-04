@@ -38,7 +38,7 @@ class SpellEffect extends Component
     {
         if (!$id) return null;
 
-        return Cache::remember("item:$id", now()->addMonth(), function () use ($id) {
+        return Cache::remember("item:$id", now()->addWeek(), function () use ($id) {
             return Item::select('id', 'Name', 'icon')->find($id);
         });
     }
@@ -47,7 +47,7 @@ class SpellEffect extends Component
     {
         if (!$type) return null;
 
-        return Cache::remember("pet:$type", now()->addMonth(), function () use ($type) {
+        return Cache::remember("pet:$type", now()->addWeek(), function () use ($type) {
             return Pet::select('id', 'type')->where('type', $type)->first();
         });
     }
@@ -56,7 +56,7 @@ class SpellEffect extends Component
     {
         if (!$id) return null;
 
-        return Cache::remember("spellgroup:$id", now()->addMonth(), function () use ($id) {
+        return Cache::remember("spellgroup:$id", now()->addWeek(), function () use ($id) {
             return Spell::select('id', 'name', 'new_icon')->where('spellgroup', $id)->first();
 
         });

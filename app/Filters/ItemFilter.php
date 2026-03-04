@@ -18,6 +18,7 @@ class ItemFilter
         'class',
         'bagslots',
         'effect',
+        'effect_id',
         'evo',
         /* stats */
         'stat1',
@@ -51,9 +52,14 @@ class ItemFilter
         return $this->builder;
     }
 
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+    }
+
     protected function name($value)
     {
-        $this->builder->where('Name', 'like', "%{$value}%");
+        $this->builder->where('Name', 'like', '%' . $this->escapeLike($value) . '%');
     }
 
     protected function type($value)
@@ -162,8 +168,24 @@ class ItemFilter
         $this->builder->where(function ($query) use ($value, $effectRelations) {
             foreach ($effectRelations as $relation) {
                 $query->orWhereHas($relation, function ($q) use ($value) {
-                    $q->where('name', 'like', "%{$value}%")->select('id');
+                    $q->where('name', 'like', '%' . $this->escapeLike($value) . '%')->select('id');
                 });
+            }
+        });
+    }
+
+    protected function effect_id($value)
+    {
+        if ($value === null || $value === '' || !is_numeric($value)) {
+            return;
+        }
+
+        $id = (int) $value;
+        $effectFields = ['proceffect', 'worneffect', 'focuseffect', 'clickeffect', 'scrolleffect'];
+
+        $this->builder->where(function ($query) use ($id, $effectFields) {
+            foreach ($effectFields as $field) {
+                $query->orWhere($field, $id);
             }
         });
     }
@@ -203,7 +225,6 @@ class ItemFilter
 
         if ($stat && $val !== null) {
 
-            // fuck operators in url
             $op = match ((int) $comp) {
                 1 => '>=',
                 2 => '<=',

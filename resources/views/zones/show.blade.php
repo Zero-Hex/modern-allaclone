@@ -17,6 +17,18 @@
             $item_type = config('everquest.item_types');
         @endphp
 
+        @if ($availableVersions->count() > 1)
+            <div class="flex gap-2 mb-4 items-center">
+                <span class="text-sm text-gray-400">Version:</span>
+                @foreach ($availableVersions as $v)
+                    <a href="{{ route('zones.show', $v->id) }}{{ $v->version > 0 ? '?v=' . $v->version : '' }}"
+                        class="btn btn-xs {{ $currentVersion === (int) $v->version ? 'btn-primary' : 'btn-ghost' }}">
+                        {{ $v->version === 0 ? 'Default' : 'v' . $v->version }}
+                    </a>
+                @endforeach
+            </div>
+        @endif
+
         <div class="card mb-6">
             <div class="card-body p-0">
                 <div class="flex flex-wrap gap-4">

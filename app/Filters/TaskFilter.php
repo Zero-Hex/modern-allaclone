@@ -33,18 +33,24 @@ class TaskFilter
         return $this->builder;
     }
 
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
+    }
+
     protected function name($value)
     {
-        $this->builder->where('title', 'like', "%{$value}%");
+        $this->builder->where('title', 'like', '%' . $this->escapeLike($value) . '%');
     }
 
     protected function level($value)
     {
-        $this->builder->where(function ($query) use ($value) {
-            $query->where(function ($q) use ($value) {
-                $q->where('min_level', 0)->orWhere('min_level', '<=', $value);
-            })->where(function ($q) use ($value) {
-                $q->where('max_level', 0)->orWhere('max_level', '>=', $value);
+        $level = (int) $value;
+        $this->builder->where(function ($query) use ($level) {
+            $query->where(function ($q) use ($level) {
+                $q->where('min_level', 0)->orWhere('min_level', '<=', $level);
+            })->where(function ($q) use ($level) {
+                $q->where('max_level', 0)->orWhere('max_level', '>=', $level);
             });
         });
     }

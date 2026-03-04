@@ -11,7 +11,7 @@ class FactionController extends Controller
 {
     public function index(Request $request)
     {
-        $factions = Cache::rememberForever('factions.all', function () {
+        $factions = Cache::remember('factions.all', now()->addWeek(), function () {
             return FactionList::orderBy('name', 'asc')->get();
         });
 
@@ -24,7 +24,7 @@ class FactionController extends Controller
     public function show(FactionList $faction)
     {
         // all factions for select
-        $allFactions = Cache::rememberForever('factions.all', function () {
+        $allFactions = Cache::remember('factions.all', now()->addWeek(), function () {
             return FactionList::orderBy('name', 'asc')->get();
         });
 

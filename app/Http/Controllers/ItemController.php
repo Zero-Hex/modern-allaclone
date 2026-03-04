@@ -27,6 +27,7 @@ class ItemController extends Controller
                     'id', 'Name', 'icon', 'itemtype', 'ac', 'hp', 'damage', 'delay',
                     'augtype', 'slots', 'bagslots', 'bagwr',
                 ])
+                ->withCount(['lootdropEntries', 'merchants'])
                 ->orderBy('id', 'asc')
                 ->paginate(50)
                 ->withQueryString();
@@ -40,7 +41,7 @@ class ItemController extends Controller
 
     public function show(Item $item)
     {
-        $itemCache = Cache::remember("items.show.{$item->id}", now()->addMonth(), function () use ($item) {
+        $itemCache = Cache::remember("items.show.{$item->id}", now()->addWeek(), function () use ($item) {
             $item = Item::with('evolvingDetails.item')->where('id', $item->id)->firstOrFail();
             $vm = (new ItemViewModel($item))->withEffects();
 
@@ -63,7 +64,6 @@ class ItemController extends Controller
 
     public function popup(Item $item)
     {
-        $item = Item::where('id', $item->id)->firstOrFail();
         (new ItemViewModel($item))->withEffects();
 
         return response()->json([
@@ -73,7 +73,7 @@ class ItemController extends Controller
 
     public function drops_by_zone(Item $item)
     {
-        $drops = Cache::rememberForever("items.drops_by_zone.{$item->id}", function () use ($item) {
+        $drops = Cache::remember("items.drops_by_zone.{$item->id}", now()->addWeek(), function () use ($item) {
             return (new ItemViewModel($item))->dropsByZone();
         });
 

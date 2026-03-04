@@ -30,18 +30,26 @@
                         </td>
                         <td class="text-nowrap">
                             @if (count($drop['npcs']) === 1)
-                                {{ $drop['npcs'][0]->clean_name }} (Lvl {{ $drop['npcs'][0]->level }})
+                                <a href="{{ route('npcs.show', $drop['npcs'][0]->id) }}" class="link-info link-hover">
+                                    {{ $drop['npcs'][0]->clean_name }}
+                                </a> (Lvl {{ $drop['npcs'][0]->level }})
                             @elseif (count($drop['npcs']) > 1)
                             <div class="zone-npc-drops collapse collapse-arrow bg-ghost">
                                 <input type="checkbox" />
                                 <div class="collapse-title font-medium p-0">
-                                    {{ $drop['npcs'][0]->clean_name }} (Lvl {{ $drop['npcs'][0]->level }})
+                                    <a href="{{ route('npcs.show', $drop['npcs'][0]->id) }}" class="link-info link-hover">
+                                        {{ $drop['npcs'][0]->clean_name }}
+                                    </a> (Lvl {{ $drop['npcs'][0]->level }})
                                     + {{ count(array_slice($drop['npcs'], 1)) }} more
                                 </div>
                                 <div class="collapse-content">
                                     <ul class="list-none list-inside">
                                         @foreach (array_slice($drop['npcs'], 1) as $npc)
-                                            <li>{{ $npc->clean_name }} (Lvl {{ $npc->level }})</li>
+                                            <li>
+                                                <a href="{{ route('npcs.show', $npc->id) }}" class="link-info link-hover">
+                                                    {{ $npc->clean_name }}
+                                                </a> (Lvl {{ $npc->level }})
+                                            </li>
                                         @endforeach
                                     </ul>
                                 </div>

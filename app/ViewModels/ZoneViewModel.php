@@ -124,6 +124,7 @@ class ZoneViewModel
             $group->y = $spawn2->y;
             $group->z = $spawn2->z;
             $group->respawntime = $spawn2->respawntime;
+            $group->variance = $spawn2->variance ?? 0;
 
             return $group;
         })

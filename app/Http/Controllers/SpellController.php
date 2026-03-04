@@ -16,11 +16,11 @@ class SpellController extends Controller
 
     public function __construct()
     {
-        $this->allSpells = Cache::rememberForever('all_spells', function () {
+        $this->allSpells = Cache::remember('all_spells', now()->addWeek(), function () {
             return Spell::pluck('name', 'id');
         });
 
-        $this->allZones = Cache::rememberForever('all_zones', function () {
+        $this->allZones = Cache::remember('all_zones', now()->addWeek(), function () {
             return Zone::select('id', 'short_name', 'long_name', 'expansion')
                 ->orderBy('id')
                 ->get()
@@ -105,8 +105,6 @@ class SpellController extends Controller
     public function popup(Spell $spell)
     {
         $effectsOnly = request()->boolean('effects-only');
-
-        $spell = Spell::where('id', $spell->id)->firstOrFail();
 
         return response()->json([
             'html' => view('spells.partials.popup', [

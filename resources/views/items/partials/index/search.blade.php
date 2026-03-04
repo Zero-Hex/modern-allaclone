@@ -130,6 +130,13 @@
                         value="{{ request('effect') }}" minlength="3" />
                 </label>
             </div>
+            <div class="flex flex-col w-full sm:w-auto">
+                <label class="input w-full">
+                    <span class="label">Effect ID</span>
+                    <input type="number" class="input" id="effect_id" name="effect_id"
+                        value="{{ request('effect_id') }}" min="1" placeholder="Exact spell ID" />
+                </label>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
